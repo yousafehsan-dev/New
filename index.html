@@ -102,7 +102,10 @@ function rain(){for(let i=0;i<60;i++)setTimeout(()=>{const x=Math.random()*cv.wi
 function heart(c,s){c.beginPath();c.moveTo(0,s/3);c.bezierCurveTo(-s,-s/2,-s/2,-s,0,-s/3);c.bezierCurveTo(s/2,-s,s,-s/2,0,s/3);c.fill()}
 let amT=0;
 (function loop(){cx.clearRect(0,0,cv.width,cv.height);if(++amT%22==0&&P.filter(p=>p.amb).length<28)amb();
-P = P.filter(p => p.y < cv.height + 30 && p.life-- > 0);
+P = P.filter(function(p) {
+    p.life = p.life - 1;
+    return (p.y < cv.height + 30) && (p.life > 0);
+});
 for(const p of P){p.x+=p.vx;p.y+=p.vy;if(p.g)p.vy+=p.g;p.a+=.04;cx.save();cx.translate(p.x,p.y);cx.rotate(p.t=='bf'?0:p.a*(p.amb?.3:1));cx.globalAlpha=p.amb?.75:Math.min(1,p.life/30);
 if(p.t=='pt'){cx.fillStyle='#ffb7d0';cx.beginPath();cx.ellipse(0,0,p.s,p.s/2,0,0,6.28);cx.fill()}
 else if(p.t=='h'){cx.fillStyle=p.c||'#ff7eb0';heart(cx,p.s)}
@@ -141,10 +144,10 @@ const Q=[["Who is more dramatic?",["Haya 😂","Me 😎","Both of us 💀"],["Ru
 ["What’s Haya’s secret superpower?",["Being cute.","Being dramatic.","Making people smile.","All of these 💗"],["Very true 🥰","Oscar-level 🎭","The best power of all 😊","Correct! Full marks 💗"]],
 ["If we were anime characters, what would our story be?",["Comedy anime 😂","Emotional friendship anime 🥹","Never-ending adventure ✨","All combined."],["Laugh track ready 😂","Bring tissues 🥹","Season 99 incoming ✨","The ultimate crossover 🌟"]],
 ["One last question... Do you know how special you are?",["Not really.","Maybe a little.","More than you can imagine. 🌸"],["Hmm, we need to fix that 🥺","A little? Try again later 😌","Yes. Exactly this. 🌸"]]];
-function quizP(){quiz={i:0};qs()}
-function qs(){const i=quiz.i;if(i>=Q.length){E(`<div class="glass" style="max-width:480px"><div style="font-size:70px;animation:bob 1.5s infinite">🏆</div><h2>Congratulations Haya!</h2><p class="sub">You passed the most important test: Being Absolutely Adorable! 😂💗</p><p style="font-weight:700;margin-bottom:14px">🏅 Official Best Friend Approved Certificate 🧸</p><button class="btn" id="nx">Continue 💗</button></div>`);burst(innerWidth/2,innerHeight/3,'hearts',40);burst(innerWidth/2,innerHeight/3,'cf',100);$('#nx').onclick=()=>go(2);return}
+function quizP(){quiz={i:0,a:[]};qs()}
+function qs(){const i=quiz.i;if(i>=Q.length){E(`<div class="glass" style="max-width:480px"><div style="font-size:70px;animation:bob 1.5s infinite">🏆</div><h2>Congratulations Haya!</h2><p class="sub">You passed the most important test: Being Absolutely Adorable! 😂💗</p><p style="font-weight:700;margin-bottom:14px">🏅 Official Best Friend Approved Certificate 🧸</p><p class="sub" style="font-size:14px;margin:6px auto">Tap below, then press Send in WhatsApp so I can see your answers 😄</p><a class="btn" style="display:inline-block;text-decoration:none;margin:6px" target="_blank" rel="noopener" href="https://wa.me/923269488934?text=${encodeURIComponent('Haya’s quiz result 🎀\n'+Q.map((q,k)=>(k+1)+') '+q[0]+' → '+quiz.a[k]).join('\n'))}">Send me my result 💌</a><br><button class="btn" id="nx" style="margin-top:10px">Continue 💗</button></div>`);burst(innerWidth/2,innerHeight/3,'hearts',40);burst(innerWidth/2,innerHeight/3,'cf',100);$('#nx').onclick=()=>go(2);return}
 const q=Q[i];E(`<div class="glass" style="max-width:480px;width:100%"><div class="prog"><b style="width:${i/Q.length*100}%"></b></div><p style="font-weight:700">Question ${i+1} of ${Q.length}</p><h2 style="margin-top:8px">${q[0]}</h2>${q[1].map((o,k)=>`<button class="opt" style="animation-delay:${k*.08}s" data-k="${k}">${o}</button>`).join('')}<div class="react"></div></div>`);
-app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{app.querySelectorAll('.opt').forEach(x=>x.disabled=true);b.classList.add('pick');$('.react').textContent=q[2][b.dataset.k];const r=b.getBoundingClientRect();burst(r.left+r.width/2,r.top,'hearts',10);setTimeout(()=>{quiz.i++;qs()},1300)})}
+app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{app.querySelectorAll('.opt').forEach(x=>x.disabled=true);b.classList.add('pick');$('.react').textContent=q[2][b.dataset.k];const r=b.getBoundingClientRect();burst(r.left+r.width/2,r.top,'hearts',10);quiz.a.push(b.textContent);setTimeout(()=>{quiz.i++;qs()},1300)})}
 /* ---------- 3 ---------- */
 function memories(){const c=["Some people enter your life and make ordinary days feel special.","Little conversations, random laughs and unforgettable moments.","Life is a little more beautiful with people like you around."];
 E(`<h2 style="max-width:640px">Some Moments Become Memories, Some People Become Special. 🌷</h2><p class="sub">Tap a polaroid to add your own picture.</p><div class="grid">${c.map((t,i)=>`<div class="pol" style="--r:${[-5,3,-2][i]}deg;--d:${i*.25}s"><label>📷 Add a photo<input type="file" accept="image/*" hidden></label><p>${t}</p></div>`).join('')}</div>
